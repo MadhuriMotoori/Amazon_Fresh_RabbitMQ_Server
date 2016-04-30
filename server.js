@@ -3,7 +3,7 @@ var amqp = require('amqp')
 	, util = require('util');
 
 var routefile = require('./services/routes')
-
+var logIn=require('./routes/logIn')
 var cnn = amqp.createConnection({host:'127.0.0.1'});
 
 cnn.on('ready', function(){
@@ -152,6 +152,50 @@ cnn.on('ready', function(){
 			util.log("Message: "+JSON.stringify(message));
 			util.log("DeliveryInfo: "+JSON.stringify(deliveryInfo));
 			routefile.admins_handle_request(message, function(err,res){
+
+				console.log("response values"  + res);
+				//return index sent
+				cnn.publish(m.replyTo, res, {
+					contentType:'application/json',
+					contentEncoding:'utf-8',
+					correlationId:m.correlationId
+				});
+			});
+		});
+	});
+});
+	cnn.on('ready', function(){
+		console.log("listening on customerslogin_queue");
+
+		cnn.queue('customerLogin_queue', function(q){
+			console.log("customerLogin queue  called");
+			q.subscribe(function(message, headers, deliveryInfo, m){
+				util.log(util.format( deliveryInfo.routingKey, message));
+				util.log("Message: "+JSON.stringify(message));
+				util.log("DeliveryInfo: "+JSON.stringify(deliveryInfo));
+				logIn.customerLogin_handle_request(message, function(err,res){
+
+					console.log("response values"  + res);
+					//return index sent
+					cnn.publish(m.replyTo, res, {
+						contentType:'application/json',
+						contentEncoding:'utf-8',
+						correlationId:m.correlationId
+					});
+				});
+			});
+		});	
+});
+cnn.on('ready', function(){
+	console.log("listening on farmers login queue");
+
+	cnn.queue('farmerLogin_queue', function(q){
+		console.log("farmerLogin queue  called");
+		q.subscribe(function(message, headers, deliveryInfo, m){
+			util.log(util.format( deliveryInfo.routingKey, message));
+			util.log("Message: "+JSON.stringify(message));
+			util.log("DeliveryInfo: "+JSON.stringify(deliveryInfo));
+			logIn.farmerLogin_handle_request(message, function(err,res){
 
 				console.log("response values"  + res);
 				//return index sent
