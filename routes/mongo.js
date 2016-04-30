@@ -1,29 +1,53 @@
 var MongoClient = require('mongodb').MongoClient;
-var db;
-var connected = false;
 
-/**
- * Connects to the MongoDB Database with the provided URL
- */
-exports.connect = function(url, callback){
-    MongoClient.connect(url, function(err, _db){
-      if (err) { throw new Error('Could not connect: '+err); }
-      db = _db;
-      connected = true;
-      console.log(connected +" is connected?"+_db);
-      callback(db);
+
+var optionvalues = {
+    db:{
+        numberOfRetries : 5
+    },
+    server: {
+        auto_reconnect: true,
+        poolSize : 40,
+        socketOptions: {
+            connectTimeoutMS: 500
+        }
+    },
+    replSet: {},
+    mongos: {}
+};
+
+function MongoPool(){}
+
+var dbconn;
+
+function initiatePool(url, callback){
+    MongoClient.connect(url, optionvalues, function(err, db) {
+        if (err) throw err;
+
+        dbconn = db;
+        connected = true;
+        if(callback && typeof(callback) == 'function')
+            callback(dbconn);
     });
-};
+    return MongoPool;
+}
 
-/**
- * Returns the collection on the selected database
- */
-exports.collection = function(name){
-    if (!connected) {
-      throw new Error('Must connect to Mongo before calling "collection"');
-    } 
-    console.log(name);
-    console.log(db.collection(name));
-    return db.collection(name);
-  
-};
+MongoPool.initiatePool = initiatePool;
+
+function connect(url, callback){
+    if(!dbconn){
+        initiatePool(url, callback)
+    }
+    else{
+        if(callback && typeof(callback) == 'function')
+            callback(dbconn);
+    }
+}
+
+
+MongoPool.connect = connect;
+
+
+module.exports = MongoPool;
+
+

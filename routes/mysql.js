@@ -20,7 +20,7 @@ function getConnection(){
 }
 
 
-function fetchData(callback,sqlQuery){
+function fetchData2(callback,sqlQuery){
 
     console.log("\nSQL Query::" + sqlQuery);
 
@@ -43,7 +43,7 @@ function fetchData(callback,sqlQuery){
 
 //ConnectionPool
 
-function fetchData2(callback,sqlQuery){
+function fetchData(callback,sqlQuery){
 
     console.log("\nSQL Query::" + sqlQuery);
 
