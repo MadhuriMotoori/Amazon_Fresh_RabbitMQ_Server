@@ -57,7 +57,6 @@ exports.validateCustomer = function(email, password, callback){
             if(results.length == 1){
                 if(results[0].status == "yes"){
                     var hash1=results[0].password;
-                    console.log(hash1);
                     bcrypt.compare(password,hash1 , function(err, result1) {
                     if(result1==true){
                         json_responses = {
@@ -110,10 +109,6 @@ exports.getcustomerDetails = function(email, callback){
                         callback(json_responses);
                     }
                 }
-
-
-
-
     }, finalquery);
 };
 
