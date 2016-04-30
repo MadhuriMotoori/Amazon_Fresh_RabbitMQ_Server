@@ -7,7 +7,7 @@ exports.validateAdmin = function(email, password, callback){
     var query = "select * from admin where email = ?";
     var params = [email];
     var finalquery = mysqlformat.format(query, params);
-    console.log("entered db" + query);
+    
     mysql.fetchData(function(err, results) {
         if (err) {
             throw err;
@@ -166,6 +166,37 @@ exports.getProductRequests = function(callback){
                 }
             }
         })
+    });
+};
+
+exports.getProductReviews=function(id,callback){
+    mongo.connect(mongoSessionConnectURL,function(mydb) {
+        mydb.collection("productDetails").find({"productId": id}, {"_id": 0}).toArray(function (err, data) {
+            if (err) {
+                json_responses = {
+                    statusCode: 401,
+                    message: "Database error"
+                }
+            }
+            else {
+                if (data.length == 0) {
+
+                    json_responses = {
+                        statusCode: 201,
+                        message: "No product available for given id"
+                    }
+
+                } else {
+                    json_responses = {
+                        statusCode: 200,
+                        product: data
+                    }
+
+                }
+
+            };
+            callback(json_responses);
+        });
     });
 };
 
