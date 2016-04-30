@@ -5,6 +5,7 @@ var mysql = require('mysql');
 var queue = require('queue');
 var connectionPool = new queue();
 
+//adding comment for develop branch
 //Put your mysql configuration settings - user, password, database and port
 function getConnection(){
     var connection = mysql.createConnection({
@@ -19,7 +20,7 @@ function getConnection(){
 }
 
 
-function fetchData(callback,sqlQuery){
+function fetchData2(callback,sqlQuery){
 
     console.log("\nSQL Query::" + sqlQuery);
 
@@ -42,7 +43,7 @@ function fetchData(callback,sqlQuery){
 
 //ConnectionPool
 
-function fetchData2(callback,sqlQuery){
+function fetchData(callback,sqlQuery){
 
     console.log("\nSQL Query::" + sqlQuery);
 
