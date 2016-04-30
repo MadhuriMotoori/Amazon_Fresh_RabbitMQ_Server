@@ -329,6 +329,29 @@ exports.getCustomerRideGraphDetails = function(customer_ssn, callback){
     }, query);
 };
 
+exports.getDriverRideGraphDetails = function(driver_ssn, callback){
+    var query = "select srclat, srclong, deslat, deslong from trips where driver_id= '"+ driver_ssn + "'" ;
+    mysql.fetchData(function(err, results){
+        if(err){
+            json_responses = {
+                statusCode: 401,
+                message: "Database error"
+            }
+        } else if(results.length > 0){
+            json_responses = {
+                statusCode: 200,
+                results : results
+            }
+        } else if(results.length == 0){
+            json_responses = {
+                statusCode: 201,
+                message: "No trips handled by this driver"
+            }
+        }
+        callback(json_responses);
+    }, query);
+};
+
 
 exports.getAreaRideGraphDetails = function(area, callback){
     var query = "select srclat, srclong, deslat, deslong from trips where descity = '" + area + "'";
