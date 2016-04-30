@@ -353,6 +353,30 @@ exports.getDriverRideGraphDetails = function(driver_ssn, callback){
 };
 
 
+exports.getAllRideGraphDetails = function(callback){
+    var query = "select srclat, srclong, deslat, deslong from trips " ;
+    mysql.fetchData(function(err, results){
+        if(err){
+            json_responses = {
+                statusCode: 401,
+                message: "Database error"
+            }
+        } else if(results.length > 0){
+            json_responses = {
+                statusCode: 200,
+                results : results
+            }
+        } else if(results.length == 0){
+            json_responses = {
+                statusCode: 201,
+                message: "No trips avaiable"
+            }
+        }
+        callback(json_responses);
+    }, query);
+};
+
+
 exports.getAreaRideGraphDetails = function(area, callback){
     var query = "select srclat, srclong, deslat, deslong from trips where descity = '" + area + "'";
     mysql.fetchData(function(err, results){
