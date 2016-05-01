@@ -7,6 +7,9 @@ var mongo = require('../routes/mongo');
 var mysql = require('../routes/mysql');
 var mysqlformat = require('mysql');
 
+var redis = require("redis"),
+    client = redis.createClient();
+
 //TODO:akash->@raghu  we need to retrieve farmer_id like we did with productid
 //TODO validation for corner cases yet to be done
 exports.addProduct=function(farmeremail,name,price,description,image,callback){
@@ -73,29 +76,39 @@ exports.addProduct=function(farmeremail,name,price,description,image,callback){
 };
 
 //TODO validation for corner cases
+
+
 exports.getProducts=function(farmer,callback){
 
-    mongo.connect(mongoSessionConnectURL,function(mydb){
-        mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).toArray(function(err,data){
-           if(err)
-           {
-           throw "error";
-           }
-           else
-           {
-               if(data)
-               {   console.log(JSON.stringify(data));
-                   json_responses = {statusCode :200,result:data};
-                   callback(json_responses);
-               }
-           }
-       })
-    });
-};
+        var keyForRedis=farmer+":"+"farmerProducts";
+
+        mongo.connect(mongoSessionConnectURL,function(mydb){
+            mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).toArray(function(err,data){
+                if(err)
+                {
+                    throw "error";
+                }
+                else
+                {
+                    if(data)
+                    {   console.log(JSON.stringify(data));
+
+                        //Setting the data in redis cache
+                        client.set(keyForRedis,JSON.stringify(data),function(){
+                            json_responses = {statusCode :200,result:data};
+                            callback(json_responses);
+                        });
+                        /*json_responses = {statusCode :200,result:data};
+                         callback(json_responses);*/
+                    }
+                }
+            })
+        });
+    };
 
 exports.allProducts=function(page,callback){
     mongo.connect(mongoSessionConnectURL,function(mydb){
-        mydb.collection("productDetails").find({"status" : "yes"},{"_id":0}).sort({"rnd_no":1}).skip(parseInt(page*4)).limit(4).toArray(function(err,data){
+        mydb.collection("productDetails").find({"status" : "yes"},{"_id":0}).sort({"rnd_no":1}).skip(parseInt(page*20)).limit(20).toArray(function(err,data){
             if(err)
             {
                 throw "error";
