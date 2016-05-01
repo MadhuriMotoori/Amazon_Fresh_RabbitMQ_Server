@@ -39,6 +39,15 @@ exports.addProduct=function(farmeremail,name,price,description,image,callback){
             //Removing the cache for the respective farmer when new product is added
             client.del(keyForRedis);
 
+            //removing the cache for customerHomePage, as we are using pagination,
+            //I am setting the keys for each page for redis, and we wont be getting 'page attribute' here
+            //which is used for pagination
+            //So randomly deleting first 5 keys from the cache
+            for(var page=0;page<5;page++){
+                var keyForRedisForAllProducts=page+":"+"allProducts";
+                client.del(keyForRedisForAllProducts);
+            }
+
             if(results.length > 0) {
                 mongo.connect(mongoSessionConnectURL,function(mydb){
                     mydb.collection("productDetails").insert({
@@ -213,6 +222,14 @@ exports.updateProductFarmerPage=function(productId,name,price,description,image,
             //Removing the key when farmer updates a product, so that updated products comes next time
             var keyForRedis=results[0].vendor+":"+"farmerProducts";
             client.del(keyForRedis);
+            //removing the cache for customerHomePage, as we are using pagination,
+            //I am setting the keys for each page for redis, and we wont be getting 'page attribute' here
+            //which is used for pagination
+            //So randomly deleting first 5 keys from the cache
+            for(var page=0;page<5;page++){
+                var keyForRedisForAllProducts=page+":"+"allProducts";
+                client.del(keyForRedisForAllProducts);
+            }
             //changed
             var query="UPDATE products set name=?, price=?, description=? where product_id=?";
             var params = [name,price,description,productId];
