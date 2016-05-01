@@ -231,6 +231,61 @@ exports.deleteAccountFarmerPage=function(email,callback){
 
 }
 
+exports.addVideo= function(farmer,video,callback){
+    mongo.connect(mongoSessionConnectURL,function(mydb){
+       mydb.collection('farmerIntro').insert({"farmerEmail":farmer,"video":video},function(err,data){
+          if(err)
+          {
+              json_responses = {
+                  statusCode : 401
+              };
+              callback(json_responses);
+          }
+           else
+          {
+              json_responses = {
+                  statusCode : 200
+              };
+              callback(json_responses);
+          }
+       });
+    });
+};
+
+exports.getVideo = function(farmer,callback){
+    mongo.connect(mongoSessionConnectURL,function(mydb){
+        mydb.collection('farmerIntro').find({"farmerEmail":farmer}).toArray(function(err,data){
+           if(err)
+           {
+               json_responses = {
+                   statusCode : 401
+               };
+               callback(json_responses);
+           }
+           else
+           {
+               if(data.length>0)
+               {
+                   json_responses = {
+                       statusCode : 200,
+                       result:data
+                   };
+                   callback(json_responses);
+               }
+               else
+               {
+                   json_responses = {
+                       statusCode : 200,
+                       isMediaPresent:false
+                    };
+                   callback(json_responses);
+
+               }
+           }
+        });
+    })
+}
+
 exports.deleteProductFarmerPage=function(productId,callback){
 
     mongo.connect(mongoSessionConnectURL,function(mydb){
