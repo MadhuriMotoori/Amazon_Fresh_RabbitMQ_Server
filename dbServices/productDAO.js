@@ -107,6 +107,7 @@ exports.getProducts=function(farmer,callback){
     };
 
 exports.allProducts=function(page,callback){
+    var keyForRedis=page+":"+"allProducts";
     mongo.connect(mongoSessionConnectURL,function(mydb){
         mydb.collection("productDetails").find({"status" : "yes"},{"_id":0}).sort({"rnd_no":1}).skip(parseInt(page*20)).limit(20).toArray(function(err,data){
             if(err)
@@ -121,9 +122,16 @@ exports.allProducts=function(page,callback){
                     callback(json_responses);
                 }*/
                 if(data.length>0)
-                {   console.log(JSON.stringify(data));
+                {
+                    client.set(keyForRedis,JSON.stringify(data),function() {
+                        json_responses = {statusCode: 200, result: data};
+                        callback(json_responses);
+                    });
+
+
+                    /*console.log(JSON.stringify(data));
                     json_responses = {statusCode :200,result:data};
-                    callback(json_responses);
+                    callback(json_responses);*/
                 }
                 else
                 {
