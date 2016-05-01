@@ -75,6 +75,18 @@ exports.getCustomerRideGraphDetails = function(msg, callback){
     });
 };
 
+exports.getDriverRideGraphDetails = function(msg, callback){
+    admin.getDriverRideGraphDetails(msg.ssn, function(response){
+        callback(null, response);
+    });
+};
+
+exports.getAllRideGraphDetails = function(msg, callback){
+    admin.getAllRideGraphDetails(function(response){
+        callback(null, response);
+    });
+};
+
 exports.getAreaRideGraphDetails = function(msg, callback){
     admin.getAreaRideGraphDetails(msg.area, function(response){
         callback(null, response);

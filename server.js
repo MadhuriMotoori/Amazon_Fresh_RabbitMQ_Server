@@ -1,5 +1,5 @@
 //super simple rpc server example
-//adding 
+
 var amqp = require('amqp')
 	, util = require('util');
 

@@ -3,6 +3,9 @@ var mysql = require('../routes/mysql');
 var mongoSessionConnectURL = "mongodb://localhost:27017/amazonfresh";
 var mongo = require('../routes/mongo');
 var bcrypt   = require('bcrypt-nodejs');
+var redis = require("redis"),
+    client = redis.createClient();
+
 exports.checkFarmerEmail = function(email, callback){
 
     var query = "select * from farmers where email = ?";
@@ -231,35 +234,106 @@ exports.deleteAccountFarmerPage=function(email,callback){
 
 }
 
+exports.addVideo= function(farmer,video,callback){
+    mongo.connect(mongoSessionConnectURL,function(mydb){
+       mydb.collection('farmerIntro').insert({"farmerEmail":farmer,"video":video},function(err,data){
+          if(err)
+          {
+              json_responses = {
+                  statusCode : 401
+              };
+              callback(json_responses);
+          }
+           else
+          {
+              json_responses = {
+                  statusCode : 200
+              };
+              callback(json_responses);
+          }
+       });
+    });
+};
+
+exports.getVideo = function(farmer,callback){
+    mongo.connect(mongoSessionConnectURL,function(mydb){
+        mydb.collection('farmerIntro').find({"farmerEmail":farmer}).toArray(function(err,data){
+           if(err)
+           {
+               json_responses = {
+                   statusCode : 401
+               };
+               callback(json_responses);
+           }
+           else
+           {
+               if(data.length>0)
+               {
+                   json_responses = {
+                       statusCode : 200,
+                       result:data
+                   };
+                   callback(json_responses);
+               }
+               else
+               {
+                   json_responses = {
+                       statusCode : 200,
+                       isMediaPresent:false
+                    };
+                   callback(json_responses);
+
+               }
+           }
+        });
+    })
+}
+
 exports.deleteProductFarmerPage=function(productId,callback){
 
-    mongo.connect(mongoSessionConnectURL,function(mydb){
-        mydb.collection("productDetails").remove({productId:productId
-        },function(err,data){
-            if(err)
-            {
-                throw "err";
-            }
-            else
-            {
-                var query="CALL deleteProduct('"+productId+"')";
+    //fetching farmers vendor name, otherwise alot of changes needs to be done to pass it from client side
 
-                mysql.fetchData(function(err, results) {
-                    if (err) {
-                        json_responses = {
-                            statusCode : 401
-                        };
-                        callback(json_responses);
-                    } else {
-                        json_responses = {
-                            statusCode : 200
-                        };
-                        callback(json_responses);
+    var query="select vendor from farmers where farmer_id=(select farmer_id from products where product_id=?)";
+    var params = [productId];
+    var finalquery = mysqlformat.format(query, params);
+
+    mysql.fetchData(function(err, results) {
+        if (err) {
+            throw err;
+        } else {
+            //Removing the key when farmer deletes a product, so that updated products comes next time
+            var keyForRedis=results[0].vendor+":"+"farmerProducts";
+            client.del(keyForRedis);
+            mongo.connect(mongoSessionConnectURL,function(mydb){
+                mydb.collection("productDetails").remove({productId:productId
+                },function(err,data){
+                    if(err)
+                    {
+                        throw "err";
                     }
-                }, query);
-            }
-        });
-    });
+                    else
+                    {
+                        var query="CALL deleteProduct('"+productId+"')";
+
+                        mysql.fetchData(function(err, results) {
+                            if (err) {
+                                json_responses = {
+                                    statusCode : 401
+                                };
+                                callback(json_responses);
+                            } else {
+                                json_responses = {
+                                    statusCode : 200
+                                };
+                                callback(json_responses);
+                            }
+                        }, query);
+                    }
+                });
+            });
+        }
+    }, finalquery);
+
 }
 
 
