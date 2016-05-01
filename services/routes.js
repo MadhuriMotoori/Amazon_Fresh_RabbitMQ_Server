@@ -142,6 +142,12 @@ exports.admins_handle_request=function(message,callback) {
     if(message.reqType === "getCustomerRideGraphDetails"){
         admin.getCustomerRideGraphDetails(message, callback);
     }
+    if(message.reqType === "getDriverRideGraphDetails"){
+        admin.getDriverRideGraphDetails(message, callback);
+    }
+    if(message.reqType === "getAllRideGraphDetails"){
+        admin.getAllRideGraphDetails(message, callback);
+    }
     if(message.reqType === "getAreaRideGraphDetails"){
         admin.getAreaRideGraphDetails(message, callback);
     }
