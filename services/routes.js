@@ -65,6 +65,12 @@ exports.farmers_handle_request=function(message,callback){
     if(message.reqType === "getFarmerDetails"){
         farmer.getFarmerDetails(message,callback);
     }
+    if(message.reqType==="addFarmerVideo"){
+        farmer.addFarmerVideo(message,callback);
+    }
+    if(message.reqType==="getFarmerVideo"){
+        farmer.getFarmerVideo(message,callback);
+    }
     if(message.reqType === "updateFarmerProfile"){
         farmer.updateFarmerProfile(message,callback);
     }

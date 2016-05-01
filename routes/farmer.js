@@ -2,7 +2,7 @@ var farmer = require('../dbServices/farmerDAO');
 var product = require('../dbServices/productDAO');
 
 exports.displayProducts = function(msg,callback){
-    product.allProducts(function(response){
+    product.allProducts(msg.page,function(response){
         callback(null,response);
     });
 
@@ -10,6 +10,18 @@ exports.displayProducts = function(msg,callback){
 
 exports.getFarmerDetails = function(msg,callback){
     farmer.getFarmer(msg.farmer_email, function(response){
+        callback(null,response);
+    });
+};
+
+exports.addFarmerVideo = function(msg,callback){
+    farmer.addVideo(msg.farmer_email,msg.video, function(response){
+        callback(null,response);
+    });
+};
+
+exports.getFarmerVideo = function(msg,callback){
+    farmer.getVideo(msg.farmer_email, function(response){
         callback(null,response);
     });
 };

@@ -93,18 +93,29 @@ exports.getProducts=function(farmer,callback){
     });
 };
 
-exports.allProducts=function(callback){
+exports.allProducts=function(page,callback){
     mongo.connect(mongoSessionConnectURL,function(mydb){
-        mydb.collection("productDetails").find({"status" : "yes"},{"_id":0}).sort({"rnd_no":1}).toArray(function(err,data){
+        mydb.collection("productDetails").find({"status" : "yes"},{"_id":0}).sort({"rnd_no":1}).skip(parseInt(page*4)).limit(4).toArray(function(err,data){
             if(err)
             {
                 throw "error";
             }
             else
             {
-                if(data)
+/*                if(data)
                 {   console.log(JSON.stringify(data));
                     json_responses = {statusCode :200,result:data};
+                    callback(json_responses);
+                }*/
+                if(data.length>0)
+                {   console.log(JSON.stringify(data));
+                    json_responses = {statusCode :200,result:data};
+                    callback(json_responses);
+                }
+                else
+                {
+                    console.log("empty result");
+                    json_responses={statusCode:200,result:"",message:"no more products"};
                     callback(json_responses);
                 }
             }
