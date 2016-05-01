@@ -222,6 +222,14 @@ exports.deleteAccountFarmerPage=function(email,callback){
                         };
                         callback(json_responses);
                     } else {
+                        //removing the cache for customerHomePage, as we are using pagination,
+                        //I am setting the keys for each page for redis, and we wont be getting 'page attribute' here
+                        //which is used for pagination
+                        //So randomly deleting first 5 keys from the cache
+                        for(var page=0;page<5;page++){
+                            var keyForRedisForAllProducts=page+":"+"allProducts";
+                            client.del(keyForRedisForAllProducts);
+                        }
                         json_responses = {
                             statusCode : 200
                         };
@@ -304,6 +312,14 @@ exports.deleteProductFarmerPage=function(productId,callback){
             //Removing the key when farmer deletes a product, so that updated products comes next time
             var keyForRedis=results[0].vendor+":"+"farmerProducts";
             client.del(keyForRedis);
+            //removing the cache for customerHomePage, as we are using pagination,
+            //I am setting the keys for each page for redis, and we wont be getting 'page attribute' here
+            //which is used for pagination
+            //So randomly deleting first 5 keys from the cache
+            for(var page=0;page<5;page++){
+                var keyForRedisForAllProducts=page+":"+"allProducts";
+                client.del(keyForRedisForAllProducts);
+            }
             mongo.connect(mongoSessionConnectURL,function(mydb){
                 mydb.collection("productDetails").remove({productId:productId
                 },function(err,data){
