@@ -11,8 +11,8 @@ function getConnection(){
     var connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'root',
-        password : 'mad',
-        database : 'amazonfreshdb',
+        password : 'root',
+        database : 'amazonfresh',
         multipleStatements:'true',
         port	 : 3306
     });
