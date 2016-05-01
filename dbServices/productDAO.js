@@ -107,7 +107,7 @@ exports.getProducts=function(farmer,callback){
         var keyForRedis=farmer+":"+"farmerProducts";
 
         mongo.connect(mongoSessionConnectURL,function(mydb){
-            mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).toArray(function(err,data){
+            mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).limit(100).toArray(function(err,data){
                 if(err)
                 {
                     throw "error";
