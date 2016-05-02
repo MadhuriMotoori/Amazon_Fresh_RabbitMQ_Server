@@ -10,6 +10,14 @@ var mysqlformat = require('mysql');
 var redis = require("redis"),
     client = redis.createClient();
 
+//To uncomment for dynamic pricing after the modules are placed
+/*var amazon = require('amazon-product-api');
+clientAmazon = amazon.createClient({
+    awsId: "AKIAICIC7POTRIMQA7VA",
+    awsSecret: "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",
+    awsTag: "vaibhav.agrawal0289"
+});*/
+
 //TODO:akash->@raghu  we need to retrieve farmer_id like we did with productid
 //TODO validation for corner cases yet to be done
 exports.addProduct=function(farmeremail,name,price,description,image,callback){
@@ -99,7 +107,7 @@ exports.getProducts=function(farmer,callback){
         var keyForRedis=farmer+":"+"farmerProducts";
 
         mongo.connect(mongoSessionConnectURL,function(mydb){
-            mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).toArray(function(err,data){
+            mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).limit(100).toArray(function(err,data){
                 if(err)
                 {
                     throw "error";
@@ -123,6 +131,41 @@ exports.getProducts=function(farmer,callback){
     };
 
 exports.allProducts=function(page,callback){
+    //For competitive pricing
+    //Since we need to change the Date in the amazon-api library commenting this code for now
+
+    /*var amazonproductId="B013KTYFYO";
+    clientAmazon.itemLookup({
+        idType: 'UPC',
+        itemId: amazonproductId,
+        responseGroup: 'ItemAttributes,Offers,Images'
+    }, function (err, results, response) {
+        if (err) {
+            console.log(err);
+        } else {
+            var amazonPrice=results[0].OfferSummary[0].LowestNewPrice[0].FormattedPrice[0];
+            amazonPrice=amazonPrice.substring(1);
+            mongo.connect(mongoSessionConnectURL,function(mydb){
+                mydb.collection("productDetails").update({"productId" : amazonproductId},{$set:{amazonPrice:amazonPrice}},function(err,data){
+                    if(err)
+                    {
+                        throw "error";
+                    }
+                    else
+                    {
+                        intialCustomerHomePage(page,callback);
+                    }
+                })
+            });
+        }
+    });*/
+
+    //To remove when above code is uncommented
+    intialCustomerHomePage(page,callback);
+};
+
+
+function intialCustomerHomePage(page,callback){
     var keyForRedis=page+":"+"allProducts";
     mongo.connect(mongoSessionConnectURL,function(mydb){
         mydb.collection("productDetails").find({"status" : "yes"},{"_id":0}).sort({"rnd_no":1}).skip(parseInt(page*20)).limit(20).toArray(function(err,data){
@@ -132,22 +175,12 @@ exports.allProducts=function(page,callback){
             }
             else
             {
-/*                if(data)
-                {   console.log(JSON.stringify(data));
-                    json_responses = {statusCode :200,result:data};
-                    callback(json_responses);
-                }*/
                 if(data.length>0)
                 {
                     client.set(keyForRedis,JSON.stringify(data),function() {
                         json_responses = {statusCode: 200, result: data};
                         callback(json_responses);
                     });
-
-
-                    /*console.log(JSON.stringify(data));
-                    json_responses = {statusCode :200,result:data};
-                    callback(json_responses);*/
                 }
                 else
                 {
@@ -158,7 +191,7 @@ exports.allProducts=function(page,callback){
             }
         })
     });
-};
+}
 
 exports.searchProducts = function(key,callback){
     console.log("hell");
