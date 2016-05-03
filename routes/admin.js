@@ -1,13 +1,13 @@
 var admin = require('../dbServices/adminDAO');
 
 exports.getCustomerRequests = function(msg, callback){
-    admin.getCustomerRequests(function(response){
+    admin.getCustomerRequests( msg.page, function(response){
         callback(null, response);
     });
 };
 
 exports.getFarmerRequests = function(msg, callback){
-    admin.getFarmerRequests(function(response){
+    admin.getFarmerRequests( msg.page, function(response){
        callback(null, response);
     });
 };
@@ -19,7 +19,7 @@ exports.getProductReviews=function(msg,callback){
 };
 
 exports.getProductRequests = function(msg, callback){
-    admin.getProductRequests(function(response){
+    admin.getProductRequests( msg.page, function(response){
         callback(null, response);
     });
 };
@@ -50,23 +50,24 @@ exports.getRevenuePerDay=function(msg,callback){
 };
 
 exports.getAllFarmers = function(msg, callback){
-    admin.getAllFarmers( function(response){
+    admin.getAllFarmers( msg.page, function(response){
         callback(null, response);
     });
 };
 
 
 exports.getAllProducts = function(msg, callback){
-    admin.getAllProducts( function(response){
+    admin.getAllProducts( msg.page, function(response){
         callback(null, response);
     });
 };
 
 
 exports.getAllCustomers = function(msg, callback){
-    admin.getAllCustomers( function(response){
+    admin.getAllCustomers( msg.page, function(response){
         callback(null, response);
     });
+
 };
 
 exports.getCustomerRideGraphDetails = function(msg, callback){
