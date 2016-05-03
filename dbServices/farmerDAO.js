@@ -3,6 +3,9 @@ var mysql = require('../routes/mysql');
 var mongoSessionConnectURL = "mongodb://localhost:27017/amazonfresh";
 var mongo = require('../routes/mongo');
 var bcrypt   = require('bcrypt-nodejs');
+var redis = require("redis"),
+    client = redis.createClient();
+
 exports.checkFarmerEmail = function(email, callback){
 
     var query = "select * from farmers where email = ?";
@@ -219,6 +222,14 @@ exports.deleteAccountFarmerPage=function(email,callback){
                         };
                         callback(json_responses);
                     } else {
+                        //removing the cache for customerHomePage, as we are using pagination,
+                        //I am setting the keys for each page for redis, and we wont be getting 'page attribute' here
+                        //which is used for pagination
+                        //So randomly deleting first 5 keys from the cache
+                        for(var page=0;page<5;page++){
+                            var keyForRedisForAllProducts=page+":"+"allProducts";
+                            client.del(keyForRedisForAllProducts);
+                        }
                         json_responses = {
                             statusCode : 200
                         };
@@ -288,33 +299,57 @@ exports.getVideo = function(farmer,callback){
 
 exports.deleteProductFarmerPage=function(productId,callback){
 
-    mongo.connect(mongoSessionConnectURL,function(mydb){
-        mydb.collection("productDetails").remove({productId:productId
-        },function(err,data){
-            if(err)
-            {
-                throw "err";
-            }
-            else
-            {
-                var query="CALL deleteProduct('"+productId+"')";
+    //fetching farmers vendor name, otherwise alot of changes needs to be done to pass it from client side
 
-                mysql.fetchData(function(err, results) {
-                    if (err) {
-                        json_responses = {
-                            statusCode : 401
-                        };
-                        callback(json_responses);
-                    } else {
-                        json_responses = {
-                            statusCode : 200
-                        };
-                        callback(json_responses);
-                    }
-                }, query);
+    var query="select vendor from farmers where farmer_id=(select farmer_id from products where product_id=?)";
+    var params = [productId];
+    var finalquery = mysqlformat.format(query, params);
+
+    mysql.fetchData(function(err, results) {
+        if (err) {
+            throw err;
+        } else {
+            //Removing the key when farmer deletes a product, so that updated products comes next time
+            var keyForRedis=results[0].vendor+":"+"farmerProducts";
+            client.del(keyForRedis);
+            //removing the cache for customerHomePage, as we are using pagination,
+            //I am setting the keys for each page for redis, and we wont be getting 'page attribute' here
+            //which is used for pagination
+            //So randomly deleting first 5 keys from the cache
+            for(var page=0;page<5;page++){
+                var keyForRedisForAllProducts=page+":"+"allProducts";
+                client.del(keyForRedisForAllProducts);
             }
-        });
-    });
+            mongo.connect(mongoSessionConnectURL,function(mydb){
+                mydb.collection("productDetails").remove({productId:productId
+                },function(err,data){
+                    if(err)
+                    {
+                        throw "err";
+                    }
+                    else
+                    {
+                        var query="CALL deleteProduct('"+productId+"')";
+
+                        mysql.fetchData(function(err, results) {
+                            if (err) {
+                                json_responses = {
+                                    statusCode : 401
+                                };
+                                callback(json_responses);
+                            } else {
+                                json_responses = {
+                                    statusCode : 200
+                                };
+                                callback(json_responses);
+                            }
+                        }, query);
+                    }
+                });
+            });
+        }
+    }, finalquery);
+
 }
 
 
