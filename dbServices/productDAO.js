@@ -95,7 +95,7 @@ exports.getProducts=function(farmer,callback){
 
 exports.allProducts=function(page,callback){
     mongo.connect(mongoSessionConnectURL,function(mydb){
-        mydb.collection("productDetails").find({"status" : "yes"},{"_id":0}).sort({"rnd_no":1}).skip(parseInt(page*4)).limit(4).toArray(function(err,data){
+        mydb.collection("productDetails").find({"status" : "yes"},{"_id":0}).sort({"rnd_no":1}).skip(parseInt(page*20)).limit(20).toArray(function(err,data){
             if(err)
             {
                 throw "error";
