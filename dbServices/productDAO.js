@@ -102,12 +102,12 @@ exports.addProduct=function(farmeremail,name,price,description,image,callback){
 //TODO validation for corner cases
 
 
-exports.getProducts=function(farmer,callback){
+exports.getProducts=function(farmer,page,callback){
 
-        var keyForRedis=farmer+":"+"farmerProducts";
+
 
         mongo.connect(mongoSessionConnectURL,function(mydb){
-            mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).limit(100).toArray(function(err,data){
+            mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).skip(parseInt(page*4)).limit(4).toArray(function(err,data){
                 if(err)
                 {
                     throw "error";
@@ -118,10 +118,10 @@ exports.getProducts=function(farmer,callback){
                     {   console.log(JSON.stringify(data));
 
                         //Setting the data in redis cache
-                        client.set(keyForRedis,JSON.stringify(data),function(){
+                        //client.set(keyForRedis,JSON.stringify(data),function(){
                             json_responses = {statusCode :200,result:data};
                             callback(json_responses);
-                        });
+                       // });
                         /*json_responses = {statusCode :200,result:data};
                          callback(json_responses);*/
                     }
@@ -193,11 +193,11 @@ function intialCustomerHomePage(page,callback){
     });
 }
 
-exports.searchProducts = function(key,callback){
+exports.searchProducts = function(key,page,callback){
     console.log("hell");
     var query = {status:"yes",metadata: new RegExp(key,'i')};
   mongo.connect(mongoSessionConnectURL,function(mydb){
-      mydb.collection("productDetails").find(query,{"_id":0}).toArray(function(err,data){
+      mydb.collection("productDetails").find(query,{"_id":0}).skip(parseInt(page*2)).limit(2).toArray(function(err,data){
           if(err)
           {
              throw "err";
