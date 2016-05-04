@@ -36,8 +36,8 @@ exports.validateAdmin = function(email, password, callback){
     }, finalquery);
 };
 
-exports.getCustomerRequests = function(callback){
-    var query = "select * from customers where status ='no'";
+exports.getCustomerRequests = function(page, callback){
+    var query = "select * from customers where status ='no' order by customer_id asc limit " + parseInt(page* 10) + ", 10";
     mysql.fetchData(function(err, results){
         if(err){
             json_responses = {
@@ -60,8 +60,8 @@ exports.getCustomerRequests = function(callback){
 };
 
 
-exports.getFarmerRequests = function(callback){
-    var query = "select * from farmers where status ='no'";
+exports.getFarmerRequests = function(page, callback){
+    var query = "select * from farmers where status ='no' order by farmer_id asc limit " + parseInt(page * 10) + ",10";
     mysql.fetchData(function(err, results){
         if(err){
             json_responses = {
@@ -140,10 +140,10 @@ exports.getRevenuePerDay=function(callback){
 };
 
 
-exports.getProductRequests = function(callback){
+exports.getProductRequests = function(page, callback){
 
     mongo.connect(mongoSessionConnectURL,function(mydb){
-        mydb.collection("productDetails").find({"status": "no"},{"_id":0}).toArray(function(err,data){
+        mydb.collection("productDetails").find({"status": "no"},{"_id":0}).skip(parseInt(page*4)).limit(4).toArray(function(err,data){
             if(err)
             {
                 throw "error";
@@ -226,8 +226,8 @@ exports.approveProduct = function(product_id, callback){
 };
 
 
-exports.getAllFarmers = function(callback){
-    var query = "select * from farmers where status ='yes'";
+exports.getAllFarmers = function(page, callback){
+    var query = "select * from farmers where status ='yes' order by farmer_id asc limit " + parseInt(page * 10) + ",10;";
     mysql.fetchData(function(err, results){
         if(err){
             json_responses = {
@@ -250,8 +250,10 @@ exports.getAllFarmers = function(callback){
 };
 
 
-exports.getAllCustomers = function(callback){
-    var query = "select * from customers where status ='yes'";
+exports.getAllCustomers = function(page, callback){
+
+
+    var query = "select * from customers where status ='yes' order by customer_id asc limit " + parseInt(page* 10) + ", 10;";
     mysql.fetchData(function(err, results){
         if(err){
             json_responses = {
@@ -275,10 +277,10 @@ exports.getAllCustomers = function(callback){
 
 
 
-exports.getAllProducts = function(callback){
+exports.getAllProducts = function(page, callback){
 
     mongo.connect(mongoSessionConnectURL,function(mydb){
-        mydb.collection("productDetails").find({"status": "yes"},{"_id":0}).toArray(function(err,data){
+        mydb.collection("productDetails").find({"status": "yes"},{"_id":0}).skip(parseInt(page*4)).limit(4).toArray(function(err,data){
             if(err)
             {
                 throw "error";
