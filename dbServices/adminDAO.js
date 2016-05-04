@@ -356,7 +356,7 @@ exports.getDriverRideGraphDetails = function(driver_ssn, callback){
 
 
 exports.getAllRideGraphDetails = function(callback){
-    var query = "select srclat, srclong, deslat, deslong from trips " ;
+    var query = "select distinct(srclat), srclong, deslat, deslong from trips " ;
     mysql.fetchData(function(err, results){
         if(err){
             json_responses = {
