@@ -107,7 +107,7 @@ exports.getProducts=function(farmer,page,callback){
 
 
         mongo.connect(mongoSessionConnectURL,function(mydb){
-            mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).skip(parseInt(page*4)).limit(4).toArray(function(err,data){
+            mydb.collection("productDetails").find({"productVendor":farmer},{"_id":0}).skip(parseInt(page*20)).limit(20).toArray(function(err,data){
                 if(err)
                 {
                     throw "error";
@@ -197,7 +197,7 @@ exports.searchProducts = function(key,page,callback){
     console.log("hell");
     var query = {status:"yes",metadata: new RegExp(key,'i')};
   mongo.connect(mongoSessionConnectURL,function(mydb){
-      mydb.collection("productDetails").find(query,{"_id":0}).skip(parseInt(page*2)).limit(2).toArray(function(err,data){
+      mydb.collection("productDetails").find(query,{"_id":0}).skip(parseInt(page*20)).limit(20).toArray(function(err,data){
           if(err)
           {
              throw "err";
