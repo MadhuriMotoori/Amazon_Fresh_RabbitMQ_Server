@@ -10,7 +10,7 @@ exports.getProductInfo = function(msg,callback){
 };
 
 exports.getFarmerProducts = function(msg,callback){
-    product.getProducts(msg.farmer_id,function( response){
+    product.getProducts(msg.farmer_id,msg.page,function( response){
         console.log("rentered" + response);
         callback(null,response);
     });
@@ -18,7 +18,7 @@ exports.getFarmerProducts = function(msg,callback){
 };
 
 exports.searchProducts = function(msg,callback){
-    product.searchProducts(msg.search,function(response){
+    product.searchProducts(msg.search,msg.page,function(response){
        callback(null,response);
     });
 };
